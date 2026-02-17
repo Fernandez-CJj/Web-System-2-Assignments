@@ -1,0 +1,142 @@
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #e0f7fa, #f1f8e9);
+    margin: 0;
+    padding: 40px;
+}
+
+h2 {
+    text-align: center;
+    color: #1e3a8a;
+    margin-bottom: 50px;
+    font-size: 36px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    width: 100%;
+}
+
+.card,
+.results {
+    background-color: #ffffff;
+    padding: 35px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 450px;
+    transition: transform 0.2s ease;
+}
+
+.card:hover,
+.results:hover {
+    transform: translateY(-3px);
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 16px;
+}
+
+input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+input:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 8px rgba(30, 58, 138, 0.3);
+    outline: none;
+}
+
+button {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #3b82f6;
+}
+
+.results h3 {
+    color: #1e3a8a;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 26px;
+}
+
+.results p {
+    font-size: 18px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.grade {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 6px;
+    color: white;
+    min-width: 40px;
+    text-align: center;
+}
+
+.A {
+    background-color: #16a34a;
+}
+
+.B {
+    background-color: #22c55e;
+}
+
+.C {
+    background-color: #facc15;
+    color: #333;
+}
+
+.D {
+    background-color: #f97316;
+}
+
+.F {
+    background-color: #dc2626;
+}
+
+.award {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 6px;
+    color: white;
+}
+
+.highest {
+    background-color: #f59e0b;
+}
+
+.high {
+    background-color: #fbbf24;
+}
+
+.honors {
+    background-color: #fcd34d;
+    color: #333;
+}
+
+.no-award {
+    background-color: #9ca3af;
+}
