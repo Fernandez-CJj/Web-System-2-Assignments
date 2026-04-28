@@ -16,5 +16,6 @@ class Student extends Model
         'year_level',
         'section',
         'email',
+        'photo_path',
     ];
 }
