@@ -7,16 +7,27 @@
             <h1>Edit profile</h1>
             <p class="form-subtitle">Keep your public trading profile clear so other players know what you play and how you trade.</p>
         </div>
-        <form method="POST" action="{{ route('profile.update') }}" class="stack">
+        <form method="POST" action="{{ route('profile.update') }}" class="stack" enctype="multipart/form-data">
             @csrf @method('PUT')
             <div class="form-grid">
+                <div class="field field-wide">
+                    <label for="profile_picture">Profile picture</label>
+                    <div class="profile-photo-control">
+                        @include('players._avatar', ['user' => $user, 'size' => 'lg'])
+                        <div>
+                            <input id="profile_picture" type="file" name="profile_picture" accept="image/*">
+                            <span class="field-hint">Upload a square image up to 2 MB. A new upload replaces the current picture.</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="field">
                     <label for="username">Username</label>
                     <input id="username" name="username" value="{{ old('username', $user->username) }}" required>
                 </div>
                 <div class="field field-wide">
                     <label for="preferred_games">Preferred games</label>
-                    <input id="preferred_games" name="preferred_games" value="{{ old('preferred_games', $user->preferred_games) }}" placeholder="Valorant, Dota 2, Fortnite">
+                    @include('shared._preferred_games_select', ['preferredGames' => $preferredGames, 'selected' => $user->preferred_games])
+                    <span class="field-hint">Select any number of games. Use each chip's x button to remove a game.</span>
                 </div>
                 <div class="field field-wide">
                     <label for="trading_preferences">Trading preferences</label>

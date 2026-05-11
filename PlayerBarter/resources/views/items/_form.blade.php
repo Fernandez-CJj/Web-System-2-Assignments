@@ -14,7 +14,15 @@
     </div>
     <div class="field">
         <label for="game_category">Game category</label>
-        <input id="game_category" name="game_category" value="{{ old('game_category', $item->game_category) }}" placeholder="Valorant" required>
+        @include('shared._game_multi_select', [
+            'id' => 'game_category',
+            'max' => 6,
+            'name' => 'game_category',
+            'placeholder' => 'Select item games',
+            'preferredGames' => $preferredGames,
+            'selected' => $item->game_category,
+        ])
+        <span class="field-hint">Select up to 6 games, then remove any chip you do not need.</span>
     </div>
     <div class="field">
         <label for="rarity">Rarity</label>
@@ -37,6 +45,27 @@
         <textarea id="description" name="description" rows="5" placeholder="Condition, notes, or trade expectations">{{ old('description', $item->description) }}</textarea>
         <span class="field-hint">Mention anything that helps another player evaluate the trade safely.</span>
     </div>
+    <div class="field field-wide">
+        <label for="item_images">Item images</label>
+        <div class="image-upload" data-image-upload data-image-upload-max="6">
+            <input id="item_images" type="file" name="item_images[]" accept="image/*" multiple data-image-upload-input>
+            <div class="image-upload-preview" data-image-upload-preview aria-live="polite"></div>
+        </div>
+        <span class="field-hint">Add up to 6 images per listing. JPG, PNG, GIF, and WebP images are accepted.</span>
+    </div>
+    @if($item->exists && $item->images->isNotEmpty())
+        <div class="field field-wide">
+            <span class="field-label">Current images</span>
+            <div class="existing-images">
+                @foreach($item->images as $image)
+                    <label class="existing-image-card">
+                        <img src="{{ $image->url }}" alt="{{ $item->name }} image {{ $loop->iteration }}">
+                        <span><input type="checkbox" name="remove_images[]" value="{{ $image->id }}"> Remove</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>
 <div class="form-actions">
     <button class="button primary" type="submit">{{ $button }}</button>

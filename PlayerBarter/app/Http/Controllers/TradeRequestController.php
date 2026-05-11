@@ -7,6 +7,7 @@ use App\Models\TradeItem;
 use App\Models\TradeRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TradeRequestController extends Controller
@@ -40,14 +41,14 @@ class TradeRequestController extends Controller
             'incoming' => auth()->user()
                 ->receivedTradeRequests()
                 ->whereIn('status', $activeStatuses)
-                ->with(['item', 'requester', 'messages.user'])
+                ->with(['item.images', 'requester', 'owner', 'messages.user'])
                 ->latest('id')
                 ->paginate(5, ['*'], 'incoming_page')
                 ->withQueryString(),
             'outgoing' => auth()->user()
                 ->sentTradeRequests()
                 ->whereIn('status', $activeStatuses)
-                ->with(['item', 'owner', 'messages.user'])
+                ->with(['item.images', 'requester', 'owner', 'messages.user'])
                 ->latest('id')
                 ->paginate(5, ['*'], 'outgoing_page')
                 ->withQueryString(),
@@ -55,7 +56,7 @@ class TradeRequestController extends Controller
                 ? TradeRequest::query()
                     ->whereIn('status', $finishedStatuses)
                     ->where($participantFilter)
-                    ->with(['item', 'requester', 'owner', 'ratings', 'messages.user'])
+                    ->with(['item.images', 'requester', 'owner', 'ratings', 'messages.user'])
                     ->latest('id')
                     ->paginate(8, ['*'], 'history_page')
                     ->withQueryString()
@@ -71,6 +72,14 @@ class TradeRequestController extends Controller
         abort_if($request->user()->isAdmin(), 403, 'Admins manage trades but cannot send trade requests.');
         abort_if($item->user_id === $request->user()->id, 403, 'You cannot request your own item.');
         abort_unless($item->availability_status === 'available', 422, 'This item is not available.');
+        if ($item->tradeRequests()
+            ->where('requester_id', $request->user()->id)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->exists()) {
+            throw ValidationException::withMessages([
+                'trade' => 'You already have an active trade request for this item.',
+            ]);
+        }
 
         $attributes = $request->validate(['message' => ['nullable', 'string', 'max:1000']]);
         $trade = TradeRequest::create([

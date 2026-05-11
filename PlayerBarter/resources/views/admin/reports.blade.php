@@ -10,7 +10,16 @@
                     <strong>{{ $report->reason }}</strong>
                     <span class="badge">{{ $report->status }}</span>
                 </div>
-                <p>Reporter: {{ $report->reporter->username }} | User: {{ $report->reportedUser?->username ?: 'N/A' }} | Item: {{ $report->item?->name ?: 'N/A' }}</p>
+                <p class="report-meta">
+                    Reporter: @include('players._identity', ['user' => $report->reporter, 'size' => 'sm'])
+                    | User:
+                    @if($report->reportedUser)
+                        @include('players._identity', ['user' => $report->reportedUser, 'size' => 'sm'])
+                    @else
+                        N/A
+                    @endif
+                    | Item: {{ $report->item?->name ?: 'N/A' }}
+                </p>
                 @if($report->reportedUser)
                     <p class="muted">Reported account status: {{ $report->reportedUser->status }}</p>
                 @endif

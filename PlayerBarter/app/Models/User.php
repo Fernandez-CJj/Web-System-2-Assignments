@@ -7,11 +7,33 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public const PREFERRED_GAMES = [
+        'Apex Legends',
+        'Call of Duty: Warzone',
+        'Counter-Strike 2',
+        'Dead by Daylight',
+        'Dota 2',
+        'Fortnite',
+        'Grand Theft Auto V',
+        'League of Legends',
+        'Marvel Rivals',
+        'Minecraft',
+        'Mobile Legends: Bang Bang',
+        'Overwatch 2',
+        'PUBG: Battlegrounds',
+        'Roblox',
+        'Rust',
+        'Tom Clancy\'s Rainbow Six Siege',
+        'Valorant',
+        'World of Warcraft',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +48,7 @@ class User extends Authenticatable
         'status',
         'preferred_games',
         'trading_preferences',
+        'profile_photo_path',
         'suspended_until',
     ];
 
@@ -86,5 +109,24 @@ class User extends Authenticatable
     public function ratingAverage(): float
     {
         return round((float) $this->receivedRatings()->avg('score'), 1);
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->profile_photo_path
+            ? Storage::disk('public')->url($this->profile_photo_path)
+            : null;
+    }
+
+    public function initials(): string
+    {
+        $parts = preg_split('/[^A-Za-z0-9]+/', $this->username);
+        $initials = collect($parts)
+            ->filter()
+            ->map(fn (string $part) => strtoupper(substr($part, 0, 1)))
+            ->take(2)
+            ->implode('');
+
+        return $initials ?: 'PB';
     }
 }

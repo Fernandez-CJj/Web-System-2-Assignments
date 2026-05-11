@@ -7,7 +7,7 @@
             <h1>Edit trade item</h1>
             <p class="form-subtitle">Keep item details accurate so trade requests stay transparent.</p>
         </div>
-        <form method="POST" action="{{ route('items.update', $item) }}" class="stack">
+        <form method="POST" action="{{ route('items.update', $item) }}" class="stack" enctype="multipart/form-data">
             @method('PUT')
             @include('items._form', ['button' => 'Update Item'])
         </form>

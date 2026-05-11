@@ -8,7 +8,7 @@
         @forelse($trade->messages as $message)
             <div @class(['trade-message' => true, 'own' => $message->user_id === auth()->id()])>
                 <div class="message-meta">
-                    <strong>{{ $message->user->username }}</strong>
+                    @include('players._identity', ['user' => $message->user, 'size' => 'sm'])
                     <span>{{ $message->created_at->diffForHumans() }}</span>
                 </div>
                 <p>{{ $message->body }}</p>

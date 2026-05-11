@@ -25,8 +25,22 @@ class TradeItem extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(TradeItemImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
     public function tradeRequests()
     {
         return $this->hasMany(TradeRequest::class, 'item_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (TradeItem $item): void {
+            foreach ($item->images as $image) {
+                $image->delete();
+            }
+        });
     }
 }

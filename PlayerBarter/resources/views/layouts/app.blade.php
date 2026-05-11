@@ -51,5 +51,30 @@
         @endif
         @yield('content')
     </main>
+
+    <div class="photo-modal" data-image-modal role="dialog" aria-modal="true" aria-label="Image preview" hidden>
+        <button class="photo-modal-backdrop" type="button" data-image-modal-close aria-label="Close image preview"></button>
+        <div class="photo-modal-dialog">
+            <button class="photo-modal-close" type="button" data-image-modal-close aria-label="Close image preview">x</button>
+            <img data-image-modal-image alt="">
+            <p data-image-modal-caption></p>
+        </div>
+    </div>
+
+    <div class="item-modal" data-item-modal role="dialog" aria-modal="true" aria-label="Item details" hidden>
+        <button class="item-modal-backdrop" type="button" data-item-modal-close aria-label="Close item details"></button>
+        <div class="item-modal-dialog">
+            <button class="item-modal-close" type="button" data-item-modal-close aria-label="Close item details">x</button>
+            <div data-item-modal-content></div>
+        </div>
+    </div>
+
+    <div class="trade-modal" data-trade-modal role="dialog" aria-modal="true" aria-label="Trade details" hidden>
+        <button class="trade-modal-backdrop" type="button" data-trade-modal-close aria-label="Close trade details"></button>
+        <div class="trade-modal-dialog">
+            <button class="trade-modal-close" type="button" data-trade-modal-close aria-label="Close trade details">x</button>
+            <div data-trade-modal-content></div>
+        </div>
+    </div>
 </body>
 </html>

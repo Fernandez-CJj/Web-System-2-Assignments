@@ -7,7 +7,7 @@
             <h1>Create player account</h1>
             <p class="form-subtitle">Set up your trading identity, preferred games, and coordination preferences.</p>
         </div>
-        <form method="POST" action="{{ route('register') }}" class="stack">
+        <form method="POST" action="{{ route('register') }}" class="stack" enctype="multipart/form-data">
             @csrf
             <div class="form-grid">
                 <div class="field">
@@ -15,13 +15,19 @@
                     <input id="username" name="username" value="{{ old('username') }}" autocomplete="username" placeholder="pixeltrader" required>
                     <span class="field-hint">Use letters, numbers, dashes, or underscores.</span>
                 </div>
+                <div class="field">
+                    <label for="profile_picture">Profile picture</label>
+                    <input id="profile_picture" type="file" name="profile_picture" accept="image/*">
+                    <span class="field-hint">Upload a square image up to 2 MB.</span>
+                </div>
                 <div class="field field-wide">
                     <label for="email">Email address</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" placeholder="player@example.com" required>
                 </div>
                 <div class="field field-wide">
                     <label for="preferred_games">Preferred games</label>
-                    <input id="preferred_games" name="preferred_games" value="{{ old('preferred_games') }}" placeholder="Valorant, Dota 2, Fortnite">
+                    @include('shared._preferred_games_select', ['preferredGames' => $preferredGames])
+                    <span class="field-hint">Select any number of games. Use each chip's x button to remove a game.</span>
                 </div>
                 <div class="field field-wide">
                     <label for="trading_preferences">Trading preferences</label>

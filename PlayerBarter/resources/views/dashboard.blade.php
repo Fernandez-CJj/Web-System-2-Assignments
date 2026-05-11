@@ -54,7 +54,7 @@
                 <h2>Incoming trade requests</h2>
                 @forelse($incomingTrades as $trade)
                     <div class="row">
-                        <span>{{ $trade->requester->username }} wants {{ $trade->item->name }}</span>
+                        <span>@include('players._identity', ['user' => $trade->requester, 'size' => 'sm']) wants {{ $trade->item->name }}</span>
                         <span class="badge">{{ $trade->status }}</span>
                     </div>
                 @empty

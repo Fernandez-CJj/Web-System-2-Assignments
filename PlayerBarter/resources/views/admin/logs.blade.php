@@ -5,7 +5,12 @@
     <section class="panel">
         @foreach($trades as $trade)
             <div class="row log">
-                <span>#{{ $trade->id }} {{ $trade->item->name }} | {{ $trade->requester->username }} requested from {{ $trade->owner->username }}</span>
+                <span>
+                    #{{ $trade->id }} {{ $trade->item->name }} |
+                    @include('players._identity', ['user' => $trade->requester, 'size' => 'sm'])
+                    requested from
+                    @include('players._identity', ['user' => $trade->owner, 'size' => 'sm'])
+                </span>
                 <span class="badge">{{ $trade->status }} | {{ $trade->created_at->format('M d, Y H:i') }}</span>
             </div>
         @endforeach

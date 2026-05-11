@@ -24,7 +24,7 @@
             @foreach($users as $user)
                 <form method="POST" action="{{ route('admin.users.update', $user) }}" class="admin-row">
                     @csrf @method('PATCH')
-                    <span class="admin-user">{{ $user->username }}</span>
+                    <span class="admin-user">@include('players._identity', ['user' => $user, 'size' => 'sm'])</span>
                     <label class="compact-field"><span>Role</span><select name="role"><option @selected($user->role === 'player')>player</option><option @selected($user->role === 'admin')>admin</option></select></label>
                     <label class="compact-field"><span>Status</span><select name="status"><option @selected($user->status === 'active')>active</option><option @selected($user->status === 'warned')>warned</option><option @selected($user->status === 'inactive')>inactive</option><option @selected($user->status === 'suspended')>suspended</option></select></label>
                     <button class="button" type="submit">Save</button>
@@ -36,7 +36,7 @@
             <h2>Recent items</h2>
             @foreach($items as $item)
                 <div class="row">
-                    <span>{{ $item->name }} by {{ $item->user->username }}</span>
+                    <span>{{ $item->name }} by @include('players._identity', ['user' => $item->user, 'size' => 'sm'])</span>
                     <span class="badge">{{ $item->availability_status }}</span>
                     <div class="actions">
                         @if($item->availability_status !== 'traded')

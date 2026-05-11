@@ -23,7 +23,9 @@
     <section class="cards">
         @foreach($players as $player)
             <article class="card">
-                <h2><a href="{{ route('players.show', $player) }}">{{ $player->username }}</a></h2>
+                <div class="player-card-head">
+                    @include('players._identity', ['user' => $player, 'size' => 'md'])
+                </div>
                 <p class="muted">{{ $player->preferred_games ?: 'No preferred games listed.' }}</p>
                 <span class="badge">Rating {{ number_format($player->received_ratings_avg_score ?: 0, 1) }}</span>
             </article>

@@ -27,9 +27,10 @@
                 <span class="badge">{{ $incoming->total() }}</span>
             </div>
             @forelse($incoming as $trade)
-                <div class="trade">
+                <div class="trade trade-card" data-trade-detail-trigger role="button" tabindex="0" aria-label="Open trade details for {{ $trade->item->name }}">
                     <div class="row"><strong>{{ $trade->item->name }}</strong><span class="badge">{{ $trade->status }}</span></div>
-                    <p>From {{ $trade->requester->username }}</p>
+                    <p>From @include('players._identity', ['user' => $trade->requester, 'size' => 'sm'])</p>
+                    @include('trades._item_summary', ['item' => $trade->item])
                     @include('trades._thread', ['trade' => $trade])
                     @if($trade->status === 'pending')
                         <form method="POST" action="{{ route('trades.update', $trade) }}" class="actions">
@@ -47,6 +48,9 @@
                             <button class="button danger" name="status" value="cancelled">Cancel Trade</button>
                         </form>
                     @endif
+                    <template data-trade-detail-template>
+                        @include('trades._detail', ['trade' => $trade])
+                    </template>
                 </div>
             @empty
                 <p class="muted">No incoming trades.</p>
@@ -60,9 +64,10 @@
                 <span class="badge">{{ $outgoing->total() }}</span>
             </div>
             @forelse($outgoing as $trade)
-                <div class="trade">
+                <div class="trade trade-card" data-trade-detail-trigger role="button" tabindex="0" aria-label="Open trade details for {{ $trade->item->name }}">
                     <div class="row"><strong>{{ $trade->item->name }}</strong><span class="badge">{{ $trade->status }}</span></div>
-                    <p>Owner {{ $trade->owner->username }}</p>
+                    <p>Owner @include('players._identity', ['user' => $trade->owner, 'size' => 'sm'])</p>
+                    @include('trades._item_summary', ['item' => $trade->item])
                     @include('trades._thread', ['trade' => $trade])
                     @if($trade->status === 'accepted')
                         <form method="POST" action="{{ route('trades.confirm', $trade) }}">
@@ -76,6 +81,9 @@
                             <button class="button danger" name="status" value="cancelled">Cancel Request</button>
                         </form>
                     @endif
+                    <template data-trade-detail-template>
+                        @include('trades._detail', ['trade' => $trade])
+                    </template>
                 </div>
             @empty
                 <p class="muted">No outgoing trades.</p>
@@ -91,11 +99,17 @@
             <span class="badge">{{ $history->total() }}</span>
         </div>
         @forelse($history as $trade)
-            <div class="trade">
+            <div class="trade trade-card" data-trade-detail-trigger role="button" tabindex="0" aria-label="Open trade details for {{ $trade->item->name }}">
                 <div class="row">
-                    <span>{{ $trade->item->name }} | {{ $trade->requester->username }} / {{ $trade->owner->username }}</span>
+                    <span class="trade-participants">
+                        {{ $trade->item->name }} |
+                        @include('players._identity', ['user' => $trade->requester, 'size' => 'sm'])
+                        /
+                        @include('players._identity', ['user' => $trade->owner, 'size' => 'sm'])
+                    </span>
                     <span class="badge">{{ $trade->status }} {{ $trade->completed_at?->format('M d, Y') }}</span>
                 </div>
+                @include('trades._item_summary', ['item' => $trade->item])
                 @include('trades._thread', ['trade' => $trade])
                 @if($trade->status === 'completed')
                     <form method="POST" action="{{ route('ratings.store', $trade) }}" class="filters">
@@ -110,6 +124,9 @@
                         <button class="button" type="submit">Save Feedback</button>
                     </form>
                 @endif
+                <template data-trade-detail-template>
+                    @include('trades._detail', ['trade' => $trade])
+                </template>
             </div>
         @empty
             <p class="muted">No completed, cancelled, or rejected trades yet.</p>

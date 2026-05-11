@@ -7,7 +7,7 @@
             <h1>Add trade item</h1>
             <p class="form-subtitle">Publish a clear listing so players can quickly judge game, rarity, and availability.</p>
         </div>
-        <form method="POST" action="{{ route('items.store') }}" class="stack">
+        <form method="POST" action="{{ route('items.store') }}" class="stack" enctype="multipart/form-data">
             @include('items._form', ['button' => 'List Item'])
         </form>
     </section>

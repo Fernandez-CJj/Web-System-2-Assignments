@@ -22,16 +22,24 @@
 
     <section class="cards">
         @forelse($items as $item)
-            <article class="card">
+            @php($hasActiveRequest = (bool) ($item->has_active_request_from_current_user ?? false))
+            <article class="card item-card" data-item-detail-trigger role="button" tabindex="0" aria-label="View details for {{ $item->name }}">
+                @include('items._gallery', ['item' => $item, 'limit' => 3])
                 <div class="row">
                     <h2>{{ $item->name }}</h2>
                     <span class="badge">{{ $item->availability_status }}</span>
                 </div>
                 <p>{{ $item->type }} | {{ $item->game_category }} | {{ $item->rarity }}</p>
                 <p class="muted">{{ $item->description ?: 'No description provided.' }}</p>
-                <p>Owner: <a href="{{ route('players.show', $item->user) }}">{{ $item->user->username }}</a> | Rating {{ $item->user->ratingAverage() ?: 'N/A' }}</p>
+                <div class="owner-line">
+                    <span>Owner</span>
+                    @include('players._identity', ['user' => $item->user, 'size' => 'sm'])
+                    <span class="muted">Rating {{ $item->user->ratingAverage() ?: 'N/A' }}</span>
+                </div>
                 <div class="actions">
-                    @if(! auth()->user()->isAdmin() && $item->user_id !== auth()->id() && $item->availability_status === 'available')
+                    @if($hasActiveRequest)
+                        <span class="context-chip">Request sent</span>
+                    @elseif(! auth()->user()->isAdmin() && $item->user_id !== auth()->id() && $item->availability_status === 'available')
                         <form method="POST" action="{{ route('trades.store', $item) }}" class="trade-request-form">
                             @csrf
                             <label class="sr-only" for="message-{{ $item->id }}">Offer note</label>
@@ -53,6 +61,9 @@
                     @endif
                     <a class="button" href="{{ route('reports.create', ['item' => $item->id, 'user' => $item->user_id]) }}">Report</a>
                 </div>
+                <template data-item-detail-template>
+                    @include('items._detail', ['item' => $item])
+                </template>
             </article>
         @empty
             <p class="muted">No active trade items match the current filters.</p>

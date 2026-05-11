@@ -10,6 +10,8 @@ use App\Models\TradeMessage;
 use App\Models\TradeRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PlayerBarterWorkflowTest extends TestCase
@@ -82,6 +84,41 @@ class PlayerBarterWorkflowTest extends TestCase
 
         $this->assertSame('cancelled', $trade->refresh()->status);
         $this->assertSame('available', $item->refresh()->availability_status);
+    }
+
+    public function test_players_cannot_create_duplicate_active_requests_for_the_same_item(): void
+    {
+        $owner = User::factory()->create();
+        $requester = User::factory()->create();
+        $item = TradeItem::create([
+            'user_id' => $owner->id,
+            'name' => 'Duplicate Guard Skin',
+            'type' => 'Cosmetic Item',
+            'game_category' => 'Valorant',
+            'rarity' => 'rare',
+            'availability_status' => 'available',
+        ]);
+
+        $this->actingAs($requester)
+            ->post(route('trades.store', $item), ['message' => 'First offer.'])
+            ->assertRedirect(route('trades.index'));
+
+        $this->actingAs($requester)
+            ->from(route('items.index'))
+            ->post(route('trades.store', $item), ['message' => 'Second offer.'])
+            ->assertRedirect(route('items.index'))
+            ->assertSessionHasErrors('trade');
+
+        $this->assertSame(1, $item->tradeRequests()
+            ->where('requester_id', $requester->id)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->count());
+
+        $this->actingAs($requester)
+            ->get(route('items.index'))
+            ->assertOk()
+            ->assertSee('Request sent')
+            ->assertDontSee('Second offer.');
     }
 
     public function test_trade_participants_can_coordinate_with_messages(): void
@@ -184,6 +221,8 @@ class PlayerBarterWorkflowTest extends TestCase
             ->assertSee('Ongoing trades')
             ->assertSee('View Finished Trades (2)')
             ->assertSee($pendingItem->name)
+            ->assertSee('data-trade-detail-trigger', false)
+            ->assertSee('data-trade-modal', false)
             ->assertDontSee($completedItem->name)
             ->assertDontSee($cancelledItem->name);
 
@@ -422,5 +461,87 @@ class PlayerBarterWorkflowTest extends TestCase
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas(User::class, ['username' => 'newplayer']);
+    }
+
+    public function test_players_can_upload_profile_pictures_and_profiles_stay_linked(): void
+    {
+        Storage::fake('public');
+        $player = User::factory()->create(['username' => 'photo_player']);
+        $viewer = User::factory()->create();
+
+        $this->actingAs($player)
+            ->put(route('profile.update'), [
+                'username' => 'photo_player',
+                'preferred_games' => User::PREFERRED_GAMES,
+                'trading_preferences' => 'Evening trades only.',
+                'profile_picture' => $this->fakePng('profile.png'),
+            ])
+            ->assertRedirect();
+
+        $player->refresh();
+        $this->assertSame(implode(', ', User::PREFERRED_GAMES), $player->preferred_games);
+        $this->assertNotNull($player->profile_photo_path);
+        Storage::disk('public')->assertExists($player->profile_photo_path);
+
+        $this->actingAs($viewer)
+            ->get(route('players.index'))
+            ->assertOk()
+            ->assertSee(route('players.show', $player), false)
+            ->assertSee($player->profile_photo_url, false)
+            ->assertSee('data-image-modal-trigger', false)
+            ->assertSee('data-image-modal', false);
+    }
+
+    public function test_players_can_upload_multiple_images_for_item_listings(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create(['username' => 'seller_with_images']);
+        $viewer = User::factory()->create();
+
+        $this->actingAs($owner)
+            ->post(route('items.store'), [
+                'name' => 'Gallery Skin',
+                'type' => 'Cosmetic Item',
+                'game_category' => ['Valorant', 'Dota 2'],
+                'rarity' => 'epic',
+                'availability_status' => 'available',
+                'description' => 'Includes screenshots from the inventory page.',
+                'item_images' => [
+                    $this->fakePng('front.png'),
+                    $this->fakePng('detail.png'),
+                ],
+            ])
+            ->assertRedirect(route('items.index'));
+
+        $item = TradeItem::with('images')->where('name', 'Gallery Skin')->firstOrFail();
+        $this->assertSame('Valorant, Dota 2', $item->game_category);
+        $this->assertCount(2, $item->images);
+
+        foreach ($item->images as $image) {
+            Storage::disk('public')->assertExists($image->path);
+        }
+
+        $this->actingAs($viewer)
+            ->get(route('items.index'))
+            ->assertOk()
+            ->assertSee(route('players.show', $owner), false)
+            ->assertSee($item->images->first()->url, false)
+            ->assertSee('data-image-modal-trigger', false)
+            ->assertSee('data-item-detail-trigger', false)
+            ->assertSee('data-item-modal', false)
+            ->assertSee(route('trades.store', $item), false)
+            ->assertSee('Send Offer');
+
+        $this->actingAs($viewer)
+            ->get(route('players.show', $owner))
+            ->assertOk()
+            ->assertSee($item->images->last()->url, false);
+    }
+
+    private function fakePng(string $name)
+    {
+        $png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
+
+        return UploadedFile::fake()->createWithContent($name, base64_decode($png));
     }
 }
